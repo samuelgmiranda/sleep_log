@@ -1,5 +1,0 @@
-- POST sleep log: request startDate, endDate, userFeel; user ID from X-User-Id.
-- GET sleep log: nullable targetDate; default previous local date; returns a log or 404.
-- GET sleep-log history: derives a date range from historyDays and returns calculated sleep information.
-- SLEEPLOG: id, userId, startDate, endDate, totalTime, userFeel.
-- userFeel values: BAD=1, OK=2, GOOD=3.

@@ -1,6 +1,0 @@
-- Validate required fields, date format, userFeel value, and endDate after startDate.
-- Calculate total sleep time in minutes from the interval with java.time.LocalTime and java.time.Duration.
-- Reject duplicate sleep logs for the same user and date.
-- History begins at local start of day for the requested duration and ends at local 23:59.
-- Calculate average total time, average start time, average end time, and userFeel frequencies.
-- Define explicit acceptance and validation scenarios for intervals crossing midnight in Phase 2.
