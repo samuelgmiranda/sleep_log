@@ -1,0 +1,5 @@
+INSERT INTO sleep_log (user_id, start_date, end_date, total_time, user_feel)
+VALUES
+    (1, TIMESTAMP '2026-09-01 22:00:00', TIMESTAMP '2026-09-02 05:30:00', 450, 2),
+    (1, TIMESTAMP '2026-09-02 22:00:00', TIMESTAMP '2026-09-03 05:30:00', 450, 2),
+    (1, TIMESTAMP '2026-09-03 22:00:00', TIMESTAMP '2026-09-04 05:30:00', 450, 2);
