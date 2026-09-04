@@ -3,15 +3,18 @@
  */
 package com.noom.interview.fullstack.sleep
 
+import javax.servlet.http.HttpServletRequest
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
+import BaseController
 
 @RestController
-class TestController {
+class TestController : BaseController() {
+    
     @GetMapping("/test")
-    fun test() : Map<String, String> {
+    fun test(httpRequest: HttpServletRequest,) : Map<String, String> {
         return mapOf(
-            "testMessage" to "Hello world!"
+            "testMessage" to "Hi ${getUserId(httpRequest)}! Hello world!"
         )
     }
 }

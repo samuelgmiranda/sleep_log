@@ -15,6 +15,11 @@
 .env.*
 *.log
 
+# Local API tooling and specifications
+/postman/
+/.postman/
+/sdd/
+
 # Operating system files
 .DS_Store
 Thumbs.db
