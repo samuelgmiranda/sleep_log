@@ -1,0 +1,20 @@
+# Gradle
+.gradle/
+**/build/
+**/bin/
+
+# Local PostgreSQL runtime data
+/db/
+
+# IDE files
+.idea/
+*.iml
+
+# Local environment and logs
+.env
+.env.*
+*.log
+
+# Operating system files
+.DS_Store
+Thumbs.db
