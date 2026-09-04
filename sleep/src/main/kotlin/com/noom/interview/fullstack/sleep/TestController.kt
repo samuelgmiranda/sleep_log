@@ -6,8 +6,6 @@ package com.noom.interview.fullstack.sleep
 import javax.servlet.http.HttpServletRequest
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
-import BaseController
-
 @RestController
 class TestController : BaseController() {
     
