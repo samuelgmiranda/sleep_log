@@ -1,0 +1,5 @@
+- Kotlin-only Spring Boot application; Gradle; Docker Compose; PostgreSQL; Flyway.
+- Controllers extend BaseController; X-User-Id header is a required integer.
+- App dates use the host's local time zone.
+- Service layers orchestrate only; Spring Data repositories own database access.
+- Errors: invalid input 400; requested log absent 404; internal error 500.
