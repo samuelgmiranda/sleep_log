@@ -8,4 +8,5 @@ interface SleepLogDAO {
     fun existsForUserAndSleepDate(userId: Int, sleepDate: LocalDate): Boolean
     fun save(sleepLog: SleepLog)
     fun findByUserAndStartDateBetween(userId: Int, startOfDay: LocalDateTime, nextDay: LocalDateTime): SleepLog?
+    fun findAllByUserAndStartDateBetween(userId: Int, startOfDay: LocalDateTime, nextDay: LocalDateTime): List<SleepLog>
 }

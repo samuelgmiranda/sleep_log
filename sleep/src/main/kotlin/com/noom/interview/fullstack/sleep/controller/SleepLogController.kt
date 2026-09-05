@@ -3,6 +3,7 @@ package com.noom.interview.fullstack.sleep.controller
 import com.noom.interview.fullstack.sleep.service.SleepLogService
 import com.noom.interview.fullstack.sleep.validation.SleepLogValidator
 import com.noom.interview.fullstack.sleep.model.SleepLogDTO
+import com.noom.interview.fullstack.sleep.model.SleepHistoryDTO
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -38,6 +39,15 @@ class SleepLogController(
     ): SleepLogDTO {
         val date = sleepLogValidator.validateTargetDate(targetDate)
         return sleepLogService.getSleepLog(getUserId(httpRequest), date)
+    }
+
+    @GetMapping("/history")
+    fun getSleepHistory(
+        httpRequest: HttpServletRequest,
+        @RequestParam(required = false) historyDays: String?
+    ): SleepHistoryDTO {
+        val effectiveHistoryDays = sleepLogValidator.validateHistoryDays(historyDays)
+        return sleepLogService.getSleepHistory(getUserId(httpRequest), effectiveHistoryDays)
     }
 }
 

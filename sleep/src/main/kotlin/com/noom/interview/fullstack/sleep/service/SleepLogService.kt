@@ -5,16 +5,21 @@ import com.noom.interview.fullstack.sleep.exception.BusinessValidationException
 import com.noom.interview.fullstack.sleep.exception.ResourceNotFoundException
 import com.noom.interview.fullstack.sleep.model.SleepLog
 import com.noom.interview.fullstack.sleep.model.SleepLogDTO
+import com.noom.interview.fullstack.sleep.model.SleepHistoryDTO
 import com.noom.interview.fullstack.sleep.model.UserFeel
 import com.noom.interview.fullstack.sleep.dao.SleepLogDAO
 import com.noom.interview.fullstack.sleep.util.DateUtil
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
-class SleepLogService(
-    private val sleepLogDAO: SleepLogDAO
+class SleepLogService @Autowired constructor(
+    private val sleepLogDAO: SleepLogDAO,
+    private val sleepHistoryAggregationService: SleepHistoryAggregationService
 ) {
+
+    constructor(sleepLogDAO: SleepLogDAO) : this(sleepLogDAO, SleepHistoryAggregationService())
 
     fun createSleepLog(userId: Int, request: CreateSleepLogRequest) {
         val startDate = DateUtil.parseDate(request.startDate!!)
@@ -48,6 +53,30 @@ class SleepLogService(
             startSleep = DateUtil.formatTime(sleepLog.startDate),
             endSleep = DateUtil.formatTime(sleepLog.endDate),
             userFeel = UserFeel.values().first { it.databaseValue == sleepLog.userFeel }.name
+        )
+    }
+
+    fun getSleepHistory(userId: Int, historyDays: Int): SleepHistoryDTO {
+        val endDate = DateUtil.currentLocalDate()
+        val startDate = DateUtil.historyStartDate(endDate, historyDays)
+        val sleepLogs = sleepLogDAO.findAllByUserAndStartDateBetween(
+            userId,
+            DateUtil.startOfDay(startDate),
+            DateUtil.startOfNextDay(endDate)
+        )
+
+        if (sleepLogs.isEmpty()) {
+            throw ResourceNotFoundException("Sleep history not found")
+        }
+
+        return SleepHistoryDTO(
+            userId = userId,
+            dateRangeStart = DateUtil.formatShortDate(startDate),
+            dateRangeEnd = DateUtil.formatShortDate(endDate),
+            averageDuration = sleepHistoryAggregationService.averageDuration(sleepLogs),
+            averageStart = sleepHistoryAggregationService.averageBedTime(sleepLogs),
+            averageEnd = sleepHistoryAggregationService.averageWakeTime(sleepLogs),
+            userFeelTotals = sleepHistoryAggregationService.feelingTotals(sleepLogs)
         )
     }
 }
