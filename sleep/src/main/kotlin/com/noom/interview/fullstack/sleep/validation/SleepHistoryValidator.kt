@@ -12,10 +12,14 @@ class SleepHistoryValidator {
         if (effectiveHistoryDays <= 0) {
             throw InvalidRequestException("historyDays must be greater than zero")
         }
+        if (effectiveHistoryDays > MAX_HISTORY_DAYS) {
+            throw InvalidRequestException("historyDays must not exceed $MAX_HISTORY_DAYS")
+        }
         return effectiveHistoryDays
     }
 
     private companion object {
         const val DEFAULT_HISTORY_DAYS = 30
+        const val MAX_HISTORY_DAYS = 365
     }
 }

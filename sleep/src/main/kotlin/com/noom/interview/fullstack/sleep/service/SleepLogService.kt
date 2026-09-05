@@ -11,15 +11,17 @@ import com.noom.interview.fullstack.sleep.model.UserFeel
 import com.noom.interview.fullstack.sleep.util.DateUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.time.Clock
 import java.time.LocalDate
 
 @Service
 class SleepLogService @Autowired constructor(
     private val sleepLogDAO: SleepLogDAO,
-    private val sleepHistoryDTOBuilder: SleepHistoryDTOBuilder
+    private val sleepHistoryDTOBuilder: SleepHistoryDTOBuilder,
+    private val clock: Clock
 ) {
 
-    constructor(sleepLogDAO: SleepLogDAO) : this(sleepLogDAO, SleepHistoryDTOBuilder())
+    constructor(sleepLogDAO: SleepLogDAO) : this(sleepLogDAO, SleepHistoryDTOBuilder(), Clock.systemDefaultZone())
 
     fun createSleepLog(userId: Int, request: CreateSleepLogRequest) {
         val startDate = DateUtil.parseDate(request.startDate!!)
@@ -57,7 +59,7 @@ class SleepLogService @Autowired constructor(
     }
 
     fun getSleepHistory(userId: Int, historyDays: Int): SleepHistoryDTO {
-        val endDate = DateUtil.currentLocalDate()
+        val endDate = DateUtil.currentLocalDate(clock)
         val startDate = DateUtil.historyStartDate(endDate, historyDays)
         val sleepLogs = sleepLogDAO.findAllByUserAndStartDateBetween(
             userId,

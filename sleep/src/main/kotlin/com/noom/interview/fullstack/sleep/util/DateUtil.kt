@@ -1,6 +1,7 @@
 package com.noom.interview.fullstack.sleep.util
 
 import java.time.Duration
+import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -31,24 +32,28 @@ object DateUtil {
     fun historyStartDate(endDate: LocalDate, historyDays: Int): LocalDate =
         endDate.minusDays(historyDays.toLong() - 1)
 
-    fun currentLocalDate(): LocalDate = LocalDate.now()
+    fun currentLocalDate(clock: Clock): LocalDate = LocalDate.now(clock)
 
     fun minutesAfterMidnight(dateTime: LocalDateTime): Int =
-        dateTime.toLocalTime().toSecondOfDay() / 60
+        ((dateTime.toLocalTime().toSecondOfDay() + SECONDS_PER_MINUTE - 1) / SECONDS_PER_MINUTE) % MINUTES_PER_DAY
 
     fun normalizeMinutesAcrossMidnight(minutes: List<Int>): List<Int> {
         if (minutes.size < 2) return minutes
 
         val sorted = minutes.sorted()
-        val startIndex = sorted.indices.maxByOrNull { index ->
+        val largestGap = sorted.indices.maxOf { index ->
             val next = sorted[(index + 1) % sorted.size]
             (next - sorted[index] + MINUTES_PER_DAY) % MINUTES_PER_DAY
-        }!! + 1
-        val periodStart = sorted[startIndex % sorted.size]
-
-        return minutes.map { minute ->
-            if (minute < periodStart) minute + MINUTES_PER_DAY else minute
         }
+        val periodStart = sorted.indices
+            .filter { index ->
+                val next = sorted[(index + 1) % sorted.size]
+                (next - sorted[index] + MINUTES_PER_DAY) % MINUTES_PER_DAY == largestGap
+            }
+            .map { index -> sorted[(index + 1) % sorted.size] }
+            .minByOrNull { start -> midnightDistance(averageWithPeriodStart(minutes, start)) }!!
+
+        return normalizedMinutes(minutes, periodStart)
     }
 
     fun ceilingAverageMinute(minutes: List<Int>): Int =
@@ -71,6 +76,14 @@ object DateUtil {
             else -> "th"
         }
 
+    private fun averageWithPeriodStart(minutes: List<Int>, periodStart: Int): Int =
+        ceilingAverageMinute(normalizedMinutes(minutes, periodStart))
+
+    private fun normalizedMinutes(minutes: List<Int>, periodStart: Int): List<Int> =
+        minutes.map { minute -> if (minute < periodStart) minute + MINUTES_PER_DAY else minute }
+
+    private fun midnightDistance(minutes: Int): Int = minOf(minutes, MINUTES_PER_DAY - minutes)
+
     fun formatDuration(totalMinutes: Long): String =
         "%02d:%02d".format(totalMinutes / 60, totalMinutes % 60)
 
@@ -89,4 +102,5 @@ object DateUtil {
     val SHORT_MONTH_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM", Locale.ENGLISH)
     private val TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("hh:mm a", Locale.ENGLISH)
     private const val MINUTES_PER_DAY = 24 * 60
+    private const val SECONDS_PER_MINUTE = 60
 }

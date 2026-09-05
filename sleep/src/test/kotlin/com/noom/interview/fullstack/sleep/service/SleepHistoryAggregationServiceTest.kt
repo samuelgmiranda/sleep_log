@@ -74,6 +74,47 @@ class SleepHistoryAggregationServiceTest {
         assertEquals(List(5) { listOf(360L, 420L, 480L, 540L, 600L, 660L) }.flatten(), durations(sleepLogs))
     }
 
+    @Test
+    fun shouldPreferMidnightWhenCircularTimeGapsTie() {
+        val sleepLogs = listOf(
+            sleepLog("2026-01-01T06:00", "2026-01-01T07:00"),
+            sleepLog("2026-01-02T18:00", "2026-01-02T19:00")
+        )
+
+        assertEquals("12:00 am", aggregationService.averageBedTime(sleepLogs))
+    }
+
+    @Test
+    fun shouldCeilingTimestampSecondsBeforeClockAggregation() {
+        val sleepLogs = listOf(
+            sleepLog("2026-01-01T23:59:59", "2026-01-02T00:00:01"),
+            sleepLog("2026-01-02T00:00:01", "2026-01-02T23:59:59")
+        )
+
+        assertEquals("12:01 am", aggregationService.averageBedTime(sleepLogs))
+        assertEquals("12:01 am", aggregationService.averageWakeTime(sleepLogs))
+    }
+
+    @Test
+    fun shouldCeilingFractionalMinuteAcrossMidnight() {
+        val sleepLogs = listOf(
+            sleepLog("2026-01-01T23:59", "2026-01-02T07:00"),
+            sleepLog("2026-01-02T00:00", "2026-01-02T07:00"),
+            sleepLog("2026-01-03T00:00", "2026-01-03T07:00")
+        )
+
+        assertEquals("12:00 am", aggregationService.averageBedTime(sleepLogs))
+    }
+
+    @Test
+    fun shouldWeightCrossMidnightOutliersByTheirFrequency() {
+        val mostlyLate = List(29) { index -> sleepLog("2026-02-01T23:00", "2026-02-02T07:00", index) } + sleepLog("2026-03-01T01:00", "2026-03-01T09:00", 30)
+        val mostlyEarly = List(29) { index -> sleepLog("2026-02-01T01:00", "2026-02-01T09:00", index) } + sleepLog("2026-03-01T23:00", "2026-03-02T07:00", 30)
+
+        assertEquals("11:04 pm", aggregationService.averageBedTime(mostlyLate))
+        assertEquals("12:56 am", aggregationService.averageBedTime(mostlyEarly))
+    }
+
     private fun assertAggregation(
         sleepLogs: List<SleepLog>,
         expectedStart: String,
@@ -89,6 +130,12 @@ class SleepHistoryAggregationServiceTest {
 
     private fun durations(sleepLogs: List<SleepLog>): List<Long> =
         sleepLogs.map { Duration.between(it.startDate, it.endDate).toMinutes() }
+
+    private fun sleepLog(startDate: String, endDate: String, id: Int = 1): SleepLog {
+        val start = LocalDateTime.parse(startDate)
+        val end = LocalDateTime.parse(endDate)
+        return SleepLog(2, start, end, Duration.between(start, end).toMinutes(), 2, id)
+    }
 }
 
 internal object SleepHistoryTestData {
