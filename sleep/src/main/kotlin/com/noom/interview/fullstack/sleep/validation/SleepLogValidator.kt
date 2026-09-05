@@ -5,6 +5,7 @@ import com.noom.interview.fullstack.sleep.exception.InvalidRequestException
 import com.noom.interview.fullstack.sleep.model.UserFeel
 import com.noom.interview.fullstack.sleep.util.DateUtil
 import java.time.LocalDateTime
+import java.time.LocalDate
 import java.time.format.DateTimeParseException
 import org.springframework.stereotype.Component
 
@@ -24,6 +25,15 @@ class SleepLogValidator {
 
         if (UserFeel.values().none { it.name == userFeel }) {
             throw InvalidRequestException("invalid userFeel parameter")
+        }
+    }
+
+    fun validateTargetDate(targetDate: String?): LocalDate? {
+        if (targetDate == null) return null
+        return try {
+            DateUtil.parseLocalDate(targetDate)
+        } catch (exception: DateTimeParseException) {
+            throw InvalidRequestException("targetDate must use MM/dd/uuuu format")
         }
     }
 

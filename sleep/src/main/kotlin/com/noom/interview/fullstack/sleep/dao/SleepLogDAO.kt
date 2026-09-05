@@ -2,8 +2,10 @@ package com.noom.interview.fullstack.sleep.dao
 
 import com.noom.interview.fullstack.sleep.model.SleepLog
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 interface SleepLogDAO {
     fun existsForUserAndSleepDate(userId: Int, sleepDate: LocalDate): Boolean
     fun save(sleepLog: SleepLog)
+    fun findByUserAndStartDateBetween(userId: Int, startOfDay: LocalDateTime, nextDay: LocalDateTime): SleepLog?
 }
