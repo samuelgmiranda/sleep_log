@@ -3,11 +3,11 @@ package com.noom.interview.fullstack.sleep.service
 import com.noom.interview.fullstack.sleep.controller.CreateSleepLogRequest
 import com.noom.interview.fullstack.sleep.exception.BusinessValidationException
 import com.noom.interview.fullstack.sleep.exception.ResourceNotFoundException
+import com.noom.interview.fullstack.sleep.dao.SleepLogDAO
+import com.noom.interview.fullstack.sleep.model.SleepHistoryDTO
 import com.noom.interview.fullstack.sleep.model.SleepLog
 import com.noom.interview.fullstack.sleep.model.SleepLogDTO
-import com.noom.interview.fullstack.sleep.model.SleepHistoryDTO
 import com.noom.interview.fullstack.sleep.model.UserFeel
-import com.noom.interview.fullstack.sleep.dao.SleepLogDAO
 import com.noom.interview.fullstack.sleep.util.DateUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -16,10 +16,10 @@ import java.time.LocalDate
 @Service
 class SleepLogService @Autowired constructor(
     private val sleepLogDAO: SleepLogDAO,
-    private val sleepHistoryAggregationService: SleepHistoryAggregationService
+    private val sleepHistoryDTOBuilder: SleepHistoryDTOBuilder
 ) {
 
-    constructor(sleepLogDAO: SleepLogDAO) : this(sleepLogDAO, SleepHistoryAggregationService())
+    constructor(sleepLogDAO: SleepLogDAO) : this(sleepLogDAO, SleepHistoryDTOBuilder())
 
     fun createSleepLog(userId: Int, request: CreateSleepLogRequest) {
         val startDate = DateUtil.parseDate(request.startDate!!)
@@ -69,14 +69,21 @@ class SleepLogService @Autowired constructor(
             throw ResourceNotFoundException("Sleep history not found")
         }
 
-        return SleepHistoryDTO(
-            userId = userId,
-            dateRangeStart = DateUtil.formatShortDate(startDate),
-            dateRangeEnd = DateUtil.formatShortDate(endDate),
-            averageDuration = sleepHistoryAggregationService.averageDuration(sleepLogs),
-            averageStart = sleepHistoryAggregationService.averageBedTime(sleepLogs),
-            averageEnd = sleepHistoryAggregationService.averageWakeTime(sleepLogs),
-            userFeelTotals = sleepHistoryAggregationService.feelingTotals(sleepLogs)
-        )
+        return buildSleepHistory(userId, startDate, endDate, sleepLogs)
     }
+
+    private fun buildSleepHistory(
+        userId: Int,
+        startDate: LocalDate,
+        endDate: LocalDate,
+        sleepLogs: List<SleepLog>
+    ): SleepHistoryDTO =
+        sleepHistoryDTOBuilder.forUser(userId)
+            .addRangeStart(startDate)
+            .addRangeEnd(endDate)
+            .withAverageDuration(sleepLogs)
+            .withAverageStart(sleepLogs)
+            .withAverageEnd(sleepLogs)
+            .withUserFeelTotals(sleepLogs)
+            .build()
 }

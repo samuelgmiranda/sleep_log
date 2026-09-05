@@ -4,8 +4,8 @@ import com.noom.interview.fullstack.sleep.controller.CreateSleepLogRequest
 import com.noom.interview.fullstack.sleep.exception.InvalidRequestException
 import com.noom.interview.fullstack.sleep.model.UserFeel
 import com.noom.interview.fullstack.sleep.util.DateUtil
-import java.time.LocalDateTime
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeParseException
 import org.springframework.stereotype.Component
 
@@ -37,15 +37,6 @@ class SleepLogValidator {
         }
     }
 
-    fun validateHistoryDays(historyDays: String?): Int {
-        val effectiveHistoryDays = historyDays?.toIntOrNull()
-            ?: if (historyDays == null) DEFAULT_HISTORY_DAYS else throw InvalidRequestException("historyDays must be an integer")
-        if (effectiveHistoryDays <= 0) {
-            throw InvalidRequestException("historyDays must be greater than zero")
-        }
-        return effectiveHistoryDays
-    }
-
     private fun parseDate(value: String?, fieldName: String): LocalDateTime {
         if (value == null) {
             throw InvalidRequestException("$fieldName is required")
@@ -57,9 +48,4 @@ class SleepLogValidator {
             throw InvalidRequestException("$fieldName must use MM/dd/uuuu HH:mm format")
         }
     }
-
-    private companion object {
-        const val DEFAULT_HISTORY_DAYS = 30
-    }
-
 }

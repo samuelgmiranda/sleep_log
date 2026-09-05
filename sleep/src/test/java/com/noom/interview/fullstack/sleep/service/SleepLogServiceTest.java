@@ -82,7 +82,9 @@ public class SleepLogServiceTest {
 
         SleepLogDTO response = service.getSleepLog(7, null);
 
-        assertEquals(com.noom.interview.fullstack.sleep.util.DateUtil.INSTANCE.formatDate(java.time.LocalDate.now().minusDays(1)), response.getTargetDate());
+        assertEquals(com.noom.interview.fullstack.sleep.util.DateUtil.INSTANCE.formatDate(
+                java.time.LocalDate.now().minusDays(1),
+                com.noom.interview.fullstack.sleep.util.DateUtil.INSTANCE.getMONTH_FORMATTER()), response.getTargetDate());
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.noom.interview.fullstack.sleep.controller
 
 import com.noom.interview.fullstack.sleep.service.SleepLogService
+import com.noom.interview.fullstack.sleep.validation.SleepHistoryValidator
 import com.noom.interview.fullstack.sleep.validation.SleepLogValidator
 import com.noom.interview.fullstack.sleep.model.SleepLogDTO
 import com.noom.interview.fullstack.sleep.model.SleepHistoryDTO
@@ -18,7 +19,8 @@ import javax.servlet.http.HttpServletRequest
 @RequestMapping("/sleep-logs")
 class SleepLogController(
     private val sleepLogService: SleepLogService,
-    private val sleepLogValidator: SleepLogValidator
+    private val sleepLogValidator: SleepLogValidator,
+    private val sleepHistoryValidator: SleepHistoryValidator
 ) : BaseController() {
 
     @PostMapping
@@ -44,9 +46,9 @@ class SleepLogController(
     @GetMapping("/history")
     fun getSleepHistory(
         httpRequest: HttpServletRequest,
-        @RequestParam(required = false) historyDays: String?
+        @RequestParam(name = "historyDays", required = false) historyDays: String?
     ): SleepHistoryDTO {
-        val effectiveHistoryDays = sleepLogValidator.validateHistoryDays(historyDays)
+        val effectiveHistoryDays = sleepHistoryValidator.validateHistoryDays(historyDays)
         return sleepLogService.getSleepHistory(getUserId(httpRequest), effectiveHistoryDays)
     }
 }

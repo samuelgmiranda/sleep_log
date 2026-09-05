@@ -59,27 +59,17 @@ object DateUtil {
             .format(TIME_FORMATTER)
             .lowercase()
 
-    fun formatDate(date: LocalDate): String {
-        val suffix = when {
-            date.dayOfMonth in 11..13 -> "th"
-            date.dayOfMonth % 10 == 1 -> "st"
-            date.dayOfMonth % 10 == 2 -> "nd"
-            date.dayOfMonth % 10 == 3 -> "rd"
-            else -> "th"
-        }
-        return "${date.format(MONTH_FORMATTER)} ${date.dayOfMonth}$suffix"
-    }
+    fun formatDate(date: LocalDate, formatter: DateTimeFormatter = MONTH_FORMATTER): String =
+        "${date.format(formatter)} ${date.dayOfMonth}${ordinalSuffix(date.dayOfMonth)}"
 
-    fun formatShortDate(date: LocalDate): String {
-        val suffix = when {
-            date.dayOfMonth in 11..13 -> "th"
-            date.dayOfMonth % 10 == 1 -> "st"
-            date.dayOfMonth % 10 == 2 -> "nd"
-            date.dayOfMonth % 10 == 3 -> "rd"
+    private fun ordinalSuffix(dayOfMonth: Int): String =
+        when {
+            dayOfMonth in 11..13 -> "th"
+            dayOfMonth % 10 == 1 -> "st"
+            dayOfMonth % 10 == 2 -> "nd"
+            dayOfMonth % 10 == 3 -> "rd"
             else -> "th"
         }
-        return "${date.format(SHORT_MONTH_FORMATTER)} ${date.dayOfMonth}$suffix"
-    }
 
     fun formatDuration(totalMinutes: Long): String =
         "%02d:%02d".format(totalMinutes / 60, totalMinutes % 60)
@@ -95,8 +85,8 @@ object DateUtil {
         .ofPattern("MM/dd/uuuu")
         .withResolverStyle(ResolverStyle.STRICT)
 
-    private val MONTH_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("MMMM", Locale.ENGLISH)
-    private val SHORT_MONTH_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM", Locale.ENGLISH)
+    val MONTH_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("MMMM", Locale.ENGLISH)
+    val SHORT_MONTH_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM", Locale.ENGLISH)
     private val TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("hh:mm a", Locale.ENGLISH)
     private const val MINUTES_PER_DAY = 24 * 60
 }
