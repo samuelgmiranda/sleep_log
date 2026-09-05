@@ -1,21 +1,22 @@
-package com.noom.interview.fullstack.sleep.repository
+package com.noom.interview.fullstack.sleep.dao
 
 import com.noom.interview.fullstack.sleep.model.SleepLog
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import com.noom.interview.fullstack.sleep.util.DateUtil
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
 
 @Repository
-class JdbcSleepLogRepository(
+class SleepLogDAOImpl(
     private val jdbcTemplate: NamedParameterJdbcTemplate
-) : SleepLogRepository {
+) : SleepLogDAO {
 
     override fun existsForUserAndSleepDate(userId: Int, sleepDate: LocalDate): Boolean {
         val parameters = MapSqlParameterSource()
             .addValue("userId", userId)
-            .addValue("startOfDay", sleepDate.atStartOfDay())
-            .addValue("nextDay", sleepDate.plusDays(1).atStartOfDay())
+            .addValue("startOfDay", DateUtil.startOfDay(sleepDate))
+            .addValue("nextDay", DateUtil.startOfNextDay(sleepDate))
 
         return jdbcTemplate.queryForObject(
             """
@@ -38,7 +39,7 @@ class JdbcSleepLogRepository(
             .addValue("startDate", sleepLog.startDate)
             .addValue("endDate", sleepLog.endDate)
             .addValue("totalTime", sleepLog.totalTime)
-            .addValue("userFeel", sleepLog.userFeel.databaseValue)
+            .addValue("userFeel", sleepLog.userFeel)
 
         jdbcTemplate.update(
             """

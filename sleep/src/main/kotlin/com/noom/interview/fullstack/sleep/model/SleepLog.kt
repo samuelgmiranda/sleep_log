@@ -7,7 +7,7 @@ data class SleepLog(
     val startDate: LocalDateTime,
     val endDate: LocalDateTime,
     val totalTime: Long,
-    val userFeel: UserFeel
+    val userFeel: Int
 )
 
 enum class UserFeel(val databaseValue: Int) {

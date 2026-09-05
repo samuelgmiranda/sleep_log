@@ -1,8 +1,7 @@
-package com.noom.interview.fullstack.sleep.api
+package com.noom.interview.fullstack.sleep.controller
 
-import com.noom.interview.fullstack.sleep.BaseController
-import com.noom.interview.fullstack.sleep.model.UserFeel
 import com.noom.interview.fullstack.sleep.service.SleepLogService
+import com.noom.interview.fullstack.sleep.validation.SleepLogValidator
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -14,7 +13,8 @@ import javax.servlet.http.HttpServletRequest
 @RestController
 @RequestMapping("/sleep-logs")
 class SleepLogController(
-    private val sleepLogService: SleepLogService
+    private val sleepLogService: SleepLogService,
+    private val sleepLogValidator: SleepLogValidator
 ) : BaseController() {
 
     @PostMapping
@@ -23,6 +23,7 @@ class SleepLogController(
         httpRequest: HttpServletRequest,
         @RequestBody request: CreateSleepLogRequest
     ): CreateSleepLogResponse {
+        sleepLogValidator.validateCreateRequest(request)
         sleepLogService.createSleepLog(getUserId(httpRequest), request)
         return CreateSleepLogResponse("saved successfully")
     }
@@ -31,7 +32,7 @@ class SleepLogController(
 data class CreateSleepLogRequest(
     val startDate: String?,
     val endDate: String?,
-    val userFeel: UserFeel?
+    val userFeel: String?
 )
 
 data class CreateSleepLogResponse(val message: String)
