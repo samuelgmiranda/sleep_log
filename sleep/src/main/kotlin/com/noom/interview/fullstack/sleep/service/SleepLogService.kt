@@ -11,17 +11,15 @@ import com.noom.interview.fullstack.sleep.model.UserFeel
 import com.noom.interview.fullstack.sleep.util.DateUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.time.Clock
 import java.time.LocalDate
 
 @Service
 class SleepLogService @Autowired constructor(
     private val sleepLogDAO: SleepLogDAO,
-    private val sleepHistoryDTOBuilder: SleepHistoryDTOBuilder,
-    private val clock: Clock
+    private val sleepHistoryDTOBuilder: SleepHistoryDTOBuilder
 ) {
 
-    constructor(sleepLogDAO: SleepLogDAO) : this(sleepLogDAO, SleepHistoryDTOBuilder(), Clock.systemDefaultZone())
+    constructor(sleepLogDAO: SleepLogDAO) : this(sleepLogDAO, SleepHistoryDTOBuilder())
 
     fun createSleepLog(userId: Int, request: CreateSleepLogRequest) {
         val startDate = DateUtil.parseDate(request.startDate!!)
@@ -59,30 +57,31 @@ class SleepLogService @Autowired constructor(
     }
 
     fun getSleepHistory(userId: Int, historyDays: Int): SleepHistoryDTO {
-        val endDate = DateUtil.currentLocalDate(clock)
-        val startDate = DateUtil.historyStartDate(endDate, historyDays)
+        val currentDate = DateUtil.currentLocalDate()
+        val queryEndDate = DateUtil.historyEndDate(currentDate)
+        val startDate = DateUtil.historyStartDate(queryEndDate, historyDays)
         val sleepLogs = sleepLogDAO.findAllByUserAndStartDateBetween(
             userId,
             DateUtil.startOfDay(startDate),
-            DateUtil.startOfNextDay(endDate)
+            DateUtil.startOfNextDay(queryEndDate)
         )
 
         if (sleepLogs.isEmpty()) {
             throw ResourceNotFoundException("Sleep history not found")
         }
 
-        return buildSleepHistory(userId, startDate, endDate, sleepLogs)
+        return buildSleepHistory(userId, startDate, currentDate, sleepLogs)
     }
 
     private fun buildSleepHistory(
         userId: Int,
         startDate: LocalDate,
-        endDate: LocalDate,
+        responseEndDate: LocalDate,
         sleepLogs: List<SleepLog>
     ): SleepHistoryDTO =
         sleepHistoryDTOBuilder.forUser(userId)
             .addRangeStart(startDate)
-            .addRangeEnd(endDate)
+            .addRangeEnd(responseEndDate)
             .withAverageDuration(sleepLogs)
             .withAverageStart(sleepLogs)
             .withAverageEnd(sleepLogs)

@@ -32,7 +32,10 @@ object DateUtil {
     fun historyStartDate(endDate: LocalDate, historyDays: Int): LocalDate =
         endDate.minusDays(historyDays.toLong() - 1)
 
-    fun currentLocalDate(clock: Clock): LocalDate = LocalDate.now(clock)
+    fun historyEndDate(currentDate: LocalDate): LocalDate =
+        currentDate.minusDays(1)
+
+    fun currentLocalDate(): LocalDate = LocalDate.now(clock)
 
     fun minutesAfterMidnight(dateTime: LocalDateTime): Int =
         ((dateTime.toLocalTime().toSecondOfDay() + SECONDS_PER_MINUTE - 1) / SECONDS_PER_MINUTE) % MINUTES_PER_DAY
@@ -103,4 +106,5 @@ object DateUtil {
     private val TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("hh:mm a", Locale.ENGLISH)
     private const val MINUTES_PER_DAY = 24 * 60
     private const val SECONDS_PER_MINUTE = 60
+    private val clock: Clock = Clock.systemDefaultZone()
 }

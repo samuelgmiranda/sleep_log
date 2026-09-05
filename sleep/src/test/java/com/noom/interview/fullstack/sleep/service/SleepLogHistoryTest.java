@@ -3,10 +3,10 @@ package com.noom.interview.fullstack.sleep.service;
 import com.noom.interview.fullstack.sleep.dao.SleepLogDAO;
 import com.noom.interview.fullstack.sleep.model.SleepHistoryDTO;
 import com.noom.interview.fullstack.sleep.model.SleepLog;
+import com.noom.interview.fullstack.sleep.util.DateUtil;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.when;
 class SleepLogHistoryTest {
 
     private final SleepLogDAO dao = mock(SleepLogDAO.class);
-    private final SleepLogService service = new SleepLogService(dao);
+    private final SleepLogService service = new SleepLogService(dao, new SleepHistoryDTOBuilder());
 
     @Test
     void queriesTheInclusiveMaximumHistoryRangeAndAggregatesEveryMatchingLog() {
@@ -38,9 +38,19 @@ class SleepLogHistoryTest {
         ArgumentCaptor<LocalDateTime> endCaptor = ArgumentCaptor.forClass(LocalDateTime.class);
         verify(dao).findAllByUserAndStartDateBetween(eq(2), startCaptor.capture(), endCaptor.capture());
 
-        LocalDate endDate = LocalDate.now();
-        assertEquals(endDate.minusDays(364).atStartOfDay(), startCaptor.getValue());
-        assertEquals(endDate.plusDays(1).atStartOfDay(), endCaptor.getValue());
+        assertEquals(DateUtil.INSTANCE.historyEndDate(DateUtil.INSTANCE.currentLocalDate()).minusDays(364).atStartOfDay(), startCaptor.getValue());
+        assertEquals(DateUtil.INSTANCE.historyEndDate(DateUtil.INSTANCE.currentLocalDate()).plusDays(1).atStartOfDay(), endCaptor.getValue());
+        assertEquals(
+                DateUtil.INSTANCE.formatDate(
+                        DateUtil.INSTANCE.historyEndDate(DateUtil.INSTANCE.currentLocalDate()).minusDays(364),
+                        DateUtil.INSTANCE.getSHORT_MONTH_FORMATTER()
+                ),
+                response.getDateRangeStart()
+        );
+        assertEquals(
+                DateUtil.INSTANCE.formatDate(DateUtil.INSTANCE.currentLocalDate(), DateUtil.INSTANCE.getSHORT_MONTH_FORMATTER()),
+                response.getDateRangeEnd()
+        );
         assertEquals("13:00", response.getAverageDuration());
         assertEquals("10:45 pm", response.getAverageStart());
         assertEquals("05:45 am", response.getAverageEnd());
