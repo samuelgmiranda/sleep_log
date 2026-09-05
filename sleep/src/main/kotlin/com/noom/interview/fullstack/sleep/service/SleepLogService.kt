@@ -43,7 +43,7 @@ class SleepLogService @Autowired constructor(
     }
 
     fun getSleepLog(userId: Int, targetDate: LocalDate?): SleepLogDTO {
-        val date = targetDate ?: LocalDate.now().minusDays(1)
+        val date = targetDate ?: DateUtil.currentLocalDate().minusDays(1)
         val sleepLog = sleepLogDAO.findByUserAndStartDateBetween(userId, DateUtil.startOfDay(date), DateUtil.startOfNextDay(date))
             ?: throw ResourceNotFoundException("Sleep log not found")
         return SleepLogDTO(
