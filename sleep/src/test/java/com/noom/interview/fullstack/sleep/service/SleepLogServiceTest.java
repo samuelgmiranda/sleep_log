@@ -181,7 +181,7 @@ public class SleepLogServiceTest {
                 org.mockito.ArgumentMatchers.any(LocalDateTime.class)
         )).thenReturn(logs);
 
-        SleepHistoryDTO response = service.getSleepHistory(2, 4000);
+        SleepHistoryDTO response = service.getSleepHistory(2, 365);
 
         assertEquals(expectedStart, response.getAverageStart());
         assertEquals(expectedEnd, response.getAverageEnd());

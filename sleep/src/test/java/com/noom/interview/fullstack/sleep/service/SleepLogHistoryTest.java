@@ -23,7 +23,7 @@ class SleepLogHistoryTest {
     private final SleepLogService service = new SleepLogService(dao);
 
     @Test
-    void queriesTheInclusiveFourThousandDayRangeAndAggregatesEveryMatchingLog() {
+    void queriesTheInclusiveMaximumHistoryRangeAndAggregatesEveryMatchingLog() {
         when(dao.findAllByUserAndStartDateBetween(eq(2), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(List.of(
                         sleepLog(4, "2026-01-01T22:00", "2026-01-02T05:00", 420, 2),
@@ -32,14 +32,14 @@ class SleepLogHistoryTest {
                         sleepLog(7, "2026-09-04T23:00", "2026-09-05T08:00", 540, 3)
                 ));
 
-        SleepHistoryDTO response = service.getSleepHistory(2, 4000);
+        SleepHistoryDTO response = service.getSleepHistory(2, 365);
 
         ArgumentCaptor<LocalDateTime> startCaptor = ArgumentCaptor.forClass(LocalDateTime.class);
         ArgumentCaptor<LocalDateTime> endCaptor = ArgumentCaptor.forClass(LocalDateTime.class);
         verify(dao).findAllByUserAndStartDateBetween(eq(2), startCaptor.capture(), endCaptor.capture());
 
         LocalDate endDate = LocalDate.now();
-        assertEquals(endDate.minusDays(3999).atStartOfDay(), startCaptor.getValue());
+        assertEquals(endDate.minusDays(364).atStartOfDay(), startCaptor.getValue());
         assertEquals(endDate.plusDays(1).atStartOfDay(), endCaptor.getValue());
         assertEquals("13:00", response.getAverageDuration());
         assertEquals("10:45 pm", response.getAverageStart());
