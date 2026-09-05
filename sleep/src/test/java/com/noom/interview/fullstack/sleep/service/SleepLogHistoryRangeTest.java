@@ -79,6 +79,37 @@ class SleepLogHistoryRangeTest {
         assertEquals(1, response.getUserFeelTotals().get("GOOD"));
     }
 
+    @Test
+    void includesPreviousDayLogStartingAtElevenFiftyNinePmInOneDayHistory() {
+        LocalDate previousCompletedDate = currentHistoryEndDate();
+        SleepLog lastMinuteLog = new SleepLog(
+                2,
+                previousCompletedDate.atTime(23, 59),
+                previousCompletedDate.plusDays(1).atTime(7, 59),
+                480,
+                2,
+                8
+        );
+        when(dao.findAllByUserAndStartDateBetween(eq(2), any(LocalDateTime.class), any(LocalDateTime.class)))
+                .thenReturn(List.of(lastMinuteLog));
+
+        SleepHistoryDTO response = service.getSleepHistory(2, 1);
+
+        ArgumentCaptor<LocalDateTime> startCaptor = ArgumentCaptor.forClass(LocalDateTime.class);
+        ArgumentCaptor<LocalDateTime> endCaptor = ArgumentCaptor.forClass(LocalDateTime.class);
+        verify(dao).findAllByUserAndStartDateBetween(eq(2), startCaptor.capture(), endCaptor.capture());
+        assertEquals(previousCompletedDate.atStartOfDay(), startCaptor.getValue());
+        assertEquals(previousCompletedDate.plusDays(1).atStartOfDay(), endCaptor.getValue());
+        assertEquals(DateUtil.INSTANCE.formatDate(previousCompletedDate, DateUtil.INSTANCE.getSHORT_MONTH_FORMATTER()), response.getDateRangeStart());
+        assertEquals(DateUtil.INSTANCE.formatDate(previousCompletedDate.plusDays(1), DateUtil.INSTANCE.getSHORT_MONTH_FORMATTER()), response.getDateRangeEnd());
+        assertEquals("08:00", response.getAverageDuration());
+        assertEquals("11:59 pm", response.getAverageStart());
+        assertEquals("07:59 am", response.getAverageEnd());
+        assertEquals(0, response.getUserFeelTotals().get("BAD"));
+        assertEquals(1, response.getUserFeelTotals().get("OK"));
+        assertEquals(0, response.getUserFeelTotals().get("GOOD"));
+    }
+
     private void assertRange(int historyDays, LocalDate expectedStart, LocalDate expectedEndExclusive) {
         when(dao.findAllByUserAndStartDateBetween(eq(2), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(List.of(new SleepLog(2, expectedStart.atTime(22, 0), expectedStart.plusDays(1).atTime(6, 0), 480, 2, 1)));
