@@ -3,6 +3,7 @@ package com.noom.interview.fullstack.sleep.service;
 import com.noom.interview.fullstack.sleep.controller.CreateSleepLogRequest;
 import com.noom.interview.fullstack.sleep.dao.SleepLogDAO;
 import com.noom.interview.fullstack.sleep.exception.BusinessValidationException;
+import com.noom.interview.fullstack.sleep.exception.ResourceNotFoundException;
 import com.noom.interview.fullstack.sleep.model.SleepLog;
 import com.noom.interview.fullstack.sleep.model.SleepLogDTO;
 import org.junit.jupiter.api.Test;
@@ -82,5 +83,15 @@ public class SleepLogServiceTest {
         SleepLogDTO response = service.getSleepLog(7, null);
 
         assertEquals(com.noom.interview.fullstack.sleep.util.DateUtil.INSTANCE.formatDate(java.time.LocalDate.now().minusDays(1)), response.getTargetDate());
+    }
+
+    @Test
+    public void returnsNotFoundWhenPreviousLocalDateHasNoSleepLog() {
+        when(dao.findByUserAndStartDateBetween(org.mockito.ArgumentMatchers.eq(7),
+                org.mockito.ArgumentMatchers.any(java.time.LocalDateTime.class),
+                org.mockito.ArgumentMatchers.any(java.time.LocalDateTime.class)))
+                .thenReturn(null);
+
+        assertThrows(ResourceNotFoundException.class, () -> service.getSleepLog(7, null));
     }
 }
