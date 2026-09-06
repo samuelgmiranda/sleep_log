@@ -47,3 +47,5 @@ The assignment is to:
 Dockerfiles are set up for your convenience for running the whole project. You will need docker and ports 5432 (Postgres) and 8080 (API).
 
 To run everything, simply execute `docker-compose up`. To build and run, execute `docker-compose up --build`.
+
+For guidance on executing the Sleep Log business-rules API test matrix, see [How to run Test scripts.md](<How to run Test scripts.md>).
