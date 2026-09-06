@@ -11,15 +11,20 @@ import com.noom.interview.fullstack.sleep.model.UserFeel
 import com.noom.interview.fullstack.sleep.util.DateUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.time.Clock
 import java.time.LocalDate
 
 @Service
 class SleepLogService @Autowired constructor(
     private val sleepLogDAO: SleepLogDAO,
-    private val sleepHistoryDTOBuilder: SleepHistoryDTOBuilder
+    private val sleepHistoryDTOBuilder: SleepHistoryDTOBuilder,
+    private val clock: Clock
 ) {
 
-    constructor(sleepLogDAO: SleepLogDAO) : this(sleepLogDAO, SleepHistoryDTOBuilder())
+    constructor(sleepLogDAO: SleepLogDAO) : this(sleepLogDAO, SleepHistoryDTOBuilder(), Clock.systemDefaultZone())
+
+    constructor(sleepLogDAO: SleepLogDAO, sleepHistoryDTOBuilder: SleepHistoryDTOBuilder) :
+        this(sleepLogDAO, sleepHistoryDTOBuilder, Clock.systemDefaultZone())
 
     fun createSleepLog(userId: Int, request: CreateSleepLogRequest) {
         val startDate = DateUtil.parseDate(request.startDate!!)
@@ -43,7 +48,7 @@ class SleepLogService @Autowired constructor(
     }
 
     fun getSleepLog(userId: Int, targetDate: LocalDate?): SleepLogDTO {
-        val date = targetDate ?: DateUtil.currentLocalDate().minusDays(1)
+        val date = targetDate ?: LocalDate.now(clock).minusDays(1)
         val sleepLog = sleepLogDAO.findByUserAndStartDateBetween(userId, DateUtil.startOfDay(date), DateUtil.startOfNextDay(date))
             ?: throw ResourceNotFoundException("Sleep log not found")
         return SleepLogDTO(
@@ -57,7 +62,7 @@ class SleepLogService @Autowired constructor(
     }
 
     fun getSleepHistory(userId: Int, historyDays: Int): SleepHistoryDTO {
-        val currentDate = DateUtil.currentLocalDate()
+        val currentDate = LocalDate.now(clock)
         val queryEndDate = DateUtil.historyEndDate(currentDate)
         val startDate = DateUtil.historyStartDate(queryEndDate, historyDays)
         val sleepLogs = sleepLogDAO.findAllByUserAndStartDateBetween(

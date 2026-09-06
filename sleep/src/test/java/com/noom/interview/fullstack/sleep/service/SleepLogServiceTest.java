@@ -56,6 +56,45 @@ public class SleepLogServiceTest {
     }
 
     @Test
+    public void preservesStartDateAndFullDurationForCrossMidnightInterval() {
+        LocalDate sleepDate = LocalDate.of(2026, 11, 1);
+        when(dao.existsForUserAndSleepDate(1, sleepDate)).thenReturn(false);
+
+        service.createSleepLog(1, new CreateSleepLogRequest(
+                "11/01/2026 21:00", "11/02/2026 07:00", "GOOD"));
+
+        ArgumentCaptor<SleepLog> sleepLogCaptor = ArgumentCaptor.forClass(SleepLog.class);
+        verify(dao).existsForUserAndSleepDate(1, sleepDate);
+        verify(dao).save(sleepLogCaptor.capture());
+        assertEquals(sleepDate.atTime(21, 0), sleepLogCaptor.getValue().getStartDate());
+        assertEquals(LocalDate.of(2026, 11, 2).atTime(7, 0), sleepLogCaptor.getValue().getEndDate());
+        assertEquals(600L, sleepLogCaptor.getValue().getTotalTime());
+    }
+
+    @Test
+    public void rejectsSecondCrossMidnightIntervalForSameUserAndStartDate() {
+        when(dao.existsForUserAndSleepDate(1, LocalDate.of(2026, 11, 1))).thenReturn(true);
+
+        assertThrows(BusinessValidationException.class, () -> service.createSleepLog(1,
+                new CreateSleepLogRequest("11/01/2026 22:00", "11/02/2026 05:00", "OK")));
+
+        verify(dao, never()).save(org.mockito.ArgumentMatchers.any(SleepLog.class));
+    }
+
+    @Test
+    public void retrievesCrossMidnightLogUsingTheStartDateWindow() {
+        LocalDate sleepDate = LocalDate.of(2026, 11, 1);
+        when(dao.findByUserAndStartDateBetween(1, sleepDate.atStartOfDay(), sleepDate.plusDays(1).atStartOfDay()))
+                .thenReturn(new SleepLog(1, sleepDate.atTime(21, 0), sleepDate.plusDays(1).atTime(7, 0), 600, 3, 1));
+
+        SleepLogDTO response = service.getSleepLog(1, sleepDate);
+
+        assertEquals("10:00", response.getSleepDuration());
+        assertEquals("09:00 pm", response.getStartSleep());
+        assertEquals("07:00 am", response.getEndSleep());
+    }
+
+    @Test
     public void composesFormattedResponseForAllOrdinalSuffixesAndFeelingValues() {
         int[] days = {1, 2, 3, 4, 10, 11, 12, 13, 20, 21, 22, 23, 31};
         String[] suffixes = {"st", "nd", "rd", "th", "th", "th", "th", "th", "th", "st", "nd", "rd", "st"};
