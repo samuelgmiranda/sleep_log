@@ -1,0 +1,123 @@
+{
+  "info": {
+    "_postman_id": "ef61cdb6-0ccf-4c15-9d83-9d9b960415ba",
+    "name": "SleepLog test API collections",
+    "description": "Collection generated from the SleepLog OpenAPI 3.0 specification.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8080",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "2",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Test endpoint",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-User-Id",
+            "value": "123",
+            "type": "text"
+          }
+        ],
+        "url": "{{baseUrl}}/test"
+      },
+      "response": []
+    },
+    {
+      "name": "Sleep logs",
+      "item": [
+        {
+          "name": "Get last night's sleep log",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-Id",
+                "value": "{{userId}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sleep-logs?targetDate=01%2F05%2F2026",
+              "host": ["{{baseUrl}}"],
+              "path": ["sleep-logs"],
+              "query": [
+                {
+                  "key": "targetDate",
+                  "value": "01/05/2026",
+                  "description": "Date to retrieve, in MM/DD/YYYY format."
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create sleep log",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-User-Id",
+                "value": "{{userId}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"startDate\": \"09/04/2026 23:00\",\n  \"endDate\": \"09/05/2026 08:00\",\n  \"userFeel\": \"GOOD\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/sleep-logs"
+          },
+          "response": []
+        },
+        {
+          "name": "Get sleep-log history",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-Id",
+                "value": "{{userId}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sleep-logs/history?historyDays=365",
+              "host": ["{{baseUrl}}"],
+              "path": ["sleep-logs", "history"],
+              "query": [
+                {
+                  "key": "historyDays",
+                  "value": "365",
+                  "description": "Number of days to include in the history."
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
