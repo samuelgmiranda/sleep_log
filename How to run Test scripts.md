@@ -4,6 +4,8 @@
 
 `sleep/test-scripts/run-sleep-api-test-matrix.ps1` is a repeatable API verification script for the seeded sleep-history scenarios.
 
+The requests, scenarios, and expected responses it validates are documented in [sleep-api-test-matrix.md](sleep/docs/sleep-api-test-matrix.md). Review that matrix when changing fixture migrations or API response contracts.
+
 It performs 55 HTTP requests against the sleep API, covering:
 
 - last night's sleep (`GET /sleep-logs`);
