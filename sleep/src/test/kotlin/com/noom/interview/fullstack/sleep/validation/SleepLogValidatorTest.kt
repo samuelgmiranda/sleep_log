@@ -4,6 +4,7 @@ import com.noom.interview.fullstack.sleep.controller.CreateSleepLogRequest
 import com.noom.interview.fullstack.sleep.exception.InvalidRequestException
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 
 class SleepLogValidatorTest {
 
@@ -11,9 +12,12 @@ class SleepLogValidatorTest {
 
     @Test
     fun acceptsValidCrossMidnightRequest() {
-        validator.validateCreateRequest(
-            CreateSleepLogRequest("09/03/2026 22:00", "09/04/2026 05:30", "GOOD")
-        )
+        assertDoesNotThrow { 
+            validator.validateCreateRequest(
+                CreateSleepLogRequest("09/03/2026 22:00", "09/04/2026 05:30", "GOOD")
+            ) 
+        }
+        
     }
 
     @Test
