@@ -92,7 +92,48 @@
           "response": []
         },
         {
-          "name": "Get sleep-log history",
+          "name": "Get weekly sleep-log history (7 days)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-Id",
+                "value": "{{userId}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sleep-logs/history?historyDays=7",
+              "host": ["{{baseUrl}}"],
+              "path": ["sleep-logs", "history"],
+              "query": [
+                {
+                  "key": "historyDays",
+                  "value": "7",
+                  "description": "Number of days to include in the weekly history."
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get default sleep-log history (30 days)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-Id",
+                "value": "{{userId}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/sleep-logs/history"
+          },
+          "response": []
+        },
+        {
+          "name": "Get year sleep-log history",
           "request": {
             "method": "GET",
             "header": [
