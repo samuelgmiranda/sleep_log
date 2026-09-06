@@ -18,6 +18,11 @@ repositories {
 	mavenCentral()
 }
 
+sourceSets {
+	main.kotlin.srcDirs = ['src/main/kotlin']
+	test.kotlin.srcDirs = ['src/test/kotlin']
+}
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
@@ -26,6 +31,7 @@ dependencies {
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
 	runtimeOnly 'org.postgresql:postgresql'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.mockito.kotlin:mockito-kotlin:4.1.0'
 }
 
 tasks.withType(KotlinCompile) {
